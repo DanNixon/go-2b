@@ -19,3 +19,17 @@ func TestModeValidateInvalid(t *testing.T) {
 	err := mode.Validate()
 	assert.NotNil(t, err)
 }
+
+func TestModeParameterCount1(t *testing.T) {
+	mode := types.Mode("continuous")
+	paramCount, err := mode.ParameterCount()
+	assert.Nil(t, err)
+	assert.Equal(t, paramCount, 1)
+}
+
+func TestModeParameterCount2(t *testing.T) {
+	mode := types.Mode("pulse")
+	paramCount, err := mode.ParameterCount()
+	assert.Nil(t, err)
+	assert.Equal(t, paramCount, 2)
+}

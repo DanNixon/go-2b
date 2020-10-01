@@ -33,3 +33,17 @@ func (m Mode) Validate() error {
 	}
 	return errors.New("Mode not valid")
 }
+
+var singleParameterModes = []Mode{ModeContinuous, ModeThrob, ModeThrust}
+
+func (m Mode) ParameterCount() (int, error) {
+	err := m.Validate()
+	n := 2
+	for _, sp := range singleParameterModes {
+		if m == sp {
+			n = 1
+			break
+		}
+	}
+	return n, err
+}
