@@ -5,6 +5,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/DanNixon/go-2b/pkg/powerbox"
 	"github.com/DanNixon/go-2b/pkg/types"
@@ -87,14 +88,20 @@ func powerboxKill(w http.ResponseWriter, r *http.Request) {
 func main() {
 	port := flag.String("port", "", "Serial port powerbox is connected to")
 	address := flag.String("address", "127.0.0.1:8080", "Address to listen on")
+	timeoutStr := flag.String("timeout", "1m", "Duration with no set commands after which output is killed")
 	flag.Parse()
 
 	if *port == "" {
 		log.Fatal("Serial port must be specified")
 	}
 
-	var err error
-	pb, err = powerbox.NewSerialPowerbox(*port)
+	timeout, err := time.ParseDuration(*timeoutStr)
+	if err != nil {
+		log.Fatalf("Cannot parse timeout duration: %v", err)
+	}
+	log.Printf("\"No command\" timeout duration is %v", timeout)
+
+	pb, err = powerbox.NewSerialPowerbox(*port, timeout)
 	if err != nil {
 		log.Fatalf("Failed to open serial port: %v", err)
 	}
