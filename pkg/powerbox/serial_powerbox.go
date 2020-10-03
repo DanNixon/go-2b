@@ -80,6 +80,16 @@ func (p *SerialPowerbox) Set(s types.Settings) (types.Status, error) {
 		}
 	}
 
+	// This gets around an issue when using modes with a single parameter where
+	// the powerbox sometimes reports the requested value of D and other times
+	// the "actual" value (where the actual value is equal to the value of C).
+	// I *think* this is a firmware issue, as I can't see any communication
+	// issues in other modes.
+	parameterCount, err := st.Settings.Mode.ParameterCount()
+	if parameterCount == 1 {
+		s.Parameters.D = st.Settings.Parameters.D
+	}
+
 	if st.Settings != s {
 		return st, errors.New("Powerbox reports different settings from requested after update")
 	}
