@@ -17,12 +17,13 @@ import (
 )
 
 type SerialPowerbox struct {
+	Timeout            *PowerboxTimeout
 	Port               io.ReadWriteCloser
 	Status             types.LockedStatus
 	CommunicationMutex sync.Mutex
 }
 
-func NewSerialPowerbox(port string) (*SerialPowerbox, error) {
+func NewSerialPowerbox(port string, timeout time.Duration) (*SerialPowerbox, error) {
 	c := serial.OpenOptions{
 		PortName:              port,
 		BaudRate:              9600,
@@ -35,6 +36,7 @@ func NewSerialPowerbox(port string) (*SerialPowerbox, error) {
 	var err error
 
 	pb.Port, err = serial.Open(c)
+	pb.Timeout = NewPowerboxTimeout(timeout, pb.Kill)
 
 	if err == nil {
 		go pb.backgroundUpdate()
@@ -59,6 +61,7 @@ func (p *SerialPowerbox) Kill() (types.Status, error) {
 
 func (p *SerialPowerbox) Set(s types.Settings) (types.Status, error) {
 	log.Printf("Setting powerbox output configuration")
+	p.Timeout.Ping()
 
 	p.CommunicationMutex.Lock()
 	defer p.CommunicationMutex.Unlock()
